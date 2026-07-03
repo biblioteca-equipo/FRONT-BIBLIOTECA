@@ -15,6 +15,7 @@ import { AutoresPage } from "@/pages/autores/AutoresPage"
 import { CategoriasPage } from "@/pages/categorias/CategoriasPage"
 import { LibrosPage } from "@/pages/libros/LibrosPage"
 import { ArbolesLibrosPage } from "@/pages/libros/ArbolesLibrosPage"
+import { InteraccionesUsuariosPage } from "@/pages/interacciones/InteraccionesUsuariosPage"
 import { EjemplaresPage } from "@/pages/libros/EjemplaresPage"
 import { PrestamosPage } from "@/pages/prestamos/PrestamosPage"
 import { ReservasPage } from "@/pages/reservas/ReservasPage"
@@ -51,6 +52,7 @@ export function App() {
                 ============================ */}
             <Route path="/libros" element={<LibrosPage />} />
             <Route path="/libros/arboles" element={<ArbolesLibrosPage />} />
+            <Route path="/interacciones" element={<InteraccionesUsuariosPage />} />
             <Route path="/ejemplares" element={<EjemplaresPage />} />
 
             <Route path="/prestamos" element={<PrestamosPage />} />

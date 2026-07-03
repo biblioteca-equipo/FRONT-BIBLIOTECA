@@ -12,6 +12,7 @@ import {
   History,
   Home,
   Network,
+  GitBranch,
 } from "lucide-react"
 
 // ============================
@@ -27,6 +28,7 @@ const menu = [
   { title: "Categorías", href: "/categorias", icon: Tags },
   { title: "Libros", href: "/libros", icon: BookOpen },
   { title: "Árboles de libros", href: "/libros/arboles", icon: Network },
+  { title: "Interacciones", href: "/interacciones", icon: GitBranch },
   { title: "Ejemplares", href: "/ejemplares", icon: ClipboardList },
   { title: "Préstamos", href: "/prestamos", icon: CalendarClock },
   { title: "Reservas", href: "/reservas", icon: ClipboardList },
