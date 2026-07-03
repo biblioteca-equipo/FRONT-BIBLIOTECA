@@ -17,7 +17,8 @@ import {
 } from "@/components/ui/table"
 
 export function LibrosPage() {
-  const { libros, loading, crearLibro, buscarLibros, listarLibros } = useLibros()
+  const { libros, catalogo, loading, crearLibro, buscarLibros, listarLibros } = useLibros()
+
   const { autores } = useAutores()
   const { categorias } = useCategorias()
 
@@ -179,6 +180,51 @@ export function LibrosPage() {
               Limpiar
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Catálogo como lista</CardTitle>
+        </CardHeader>
+
+        <CardContent className="overflow-x-auto">
+          <div className="mb-4 grid gap-3 rounded-md border p-4 text-sm text-muted-foreground md:grid-cols-3">
+            <p>
+              <strong className="text-foreground">Estructura:</strong> {catalogo?.estructura || "-"}
+            </p>
+
+            <p>
+              <strong className="text-foreground">Total:</strong> {catalogo?.total ?? 0}
+            </p>
+
+            <p>
+              <strong className="text-foreground">Descripción:</strong>{" "}
+              {catalogo?.descripcion || "-"}
+            </p>
+          </div>
+
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Título</TableHead>
+                <TableHead>ISBN</TableHead>
+                <TableHead>Estado</TableHead>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
+              {(catalogo?.datos || []).map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell>{item.id}</TableCell>
+                  <TableCell>{item.titulo}</TableCell>
+                  <TableCell>{item.isbn || "-"}</TableCell>
+                  <TableCell>{item.estado}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 

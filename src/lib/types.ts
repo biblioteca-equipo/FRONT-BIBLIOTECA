@@ -127,3 +127,17 @@ export interface EstructuraResponse<T> {
   total: number
   datos: T[]
 }
+
+export interface CatalogoLibro {
+  id: number
+  titulo: string
+  isbn: string | null
+  estado: string
+}
+
+export interface CatalogoListaResponse {
+  estructura: string
+  descripcion: string
+  total: number
+  datos: CatalogoLibro[]
+}

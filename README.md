@@ -151,13 +151,13 @@ touch .env
 Agregar la URL del backend:
 
 ```env
-VITE_API_URL=http://127.0.0.1:8000
+VITE_API_URL=http://127.0.0.1:8003
 ```
 
 Si no se configura esta variable, el frontend usará por defecto:
 
 ```txt
-http://127.0.0.1:8000
+http://127.0.0.1:8003
 ```
 
 ---
