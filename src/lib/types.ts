@@ -17,7 +17,6 @@ export interface UsuarioCreate {
   email: string
   password: string
   telefono?: string | null
-  rol?: string
 }
 
 export interface LoginRequest {

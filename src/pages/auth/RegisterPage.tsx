@@ -21,7 +21,6 @@ export function RegisterPage() {
     email: "",
     password: "",
     telefono: "",
-    rol: "LECTOR",
   })
 
   async function handleSubmit(event: FormEvent) {
@@ -37,7 +36,6 @@ export function RegisterPage() {
         email: form.email,
         password: form.password,
         telefono: form.telefono || null,
-        rol: form.rol,
       })
 
       setSuccess("Usuario registrado correctamente")
@@ -142,21 +140,6 @@ export function RegisterPage() {
             className="bg-slate-100 text-slate-950 dark:bg-white/90"
             required
           />
-        </div>
-
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="rol" className="text-slate-900 dark:text-white">
-            Rol
-          </Label>
-          <select
-            id="rol"
-            value={form.rol}
-            onChange={(event) => setForm({ ...form, rol: event.target.value })}
-            className="flex h-10 w-full rounded-md border border-input bg-slate-100 px-3 py-2 text-sm text-slate-950 dark:bg-white/90"
-          >
-            <option value="LECTOR">LECTOR</option>
-            <option value="ADMIN">ADMIN</option>
-          </select>
         </div>
 
         <Button
