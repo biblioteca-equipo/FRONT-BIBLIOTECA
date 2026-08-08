@@ -16,6 +16,7 @@ import { CategoriasPage } from "@/pages/categorias/CategoriasPage"
 import { LibrosPage } from "@/pages/libros/LibrosPage"
 import { ArbolesLibrosPage } from "@/pages/libros/ArbolesLibrosPage"
 import { InteraccionesUsuariosPage } from "@/pages/interacciones/InteraccionesUsuariosPage"
+import { GrafoInteraccionesPage } from "@/pages/interacciones/GrafoInteraccionesPage"
 import { EjemplaresPage } from "@/pages/libros/EjemplaresPage"
 import { PrestamosPage } from "@/pages/prestamos/PrestamosPage"
 import { ReservasPage } from "@/pages/reservas/ReservasPage"
@@ -43,21 +44,24 @@ export function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
             <Route path="/" element={<DashboardPage />} />
-            <Route path="/usuarios" element={<UsuariosPage />} />
-            <Route path="/autores" element={<AutoresPage />} />
-            <Route path="/categorias" element={<CategoriasPage />} />
+            <Route element={<ProtectedRoute allowedRoles={["ADMIN", "BIBLIOTECARIO"]} />}>
+              <Route path="/usuarios" element={<UsuariosPage />} />
+              <Route path="/autores" element={<AutoresPage />} />
+              <Route path="/categorias" element={<CategoriasPage />} />
 
-            {/* ============================
-                Books Routes
-                ============================ */}
-            <Route path="/libros" element={<LibrosPage />} />
-            <Route path="/libros/arboles" element={<ArbolesLibrosPage />} />
-            <Route path="/interacciones" element={<InteraccionesUsuariosPage />} />
-            <Route path="/ejemplares" element={<EjemplaresPage />} />
+              {/* ============================
+                  Books Routes
+                  ============================ */}
+              <Route path="/libros" element={<LibrosPage />} />
+              <Route path="/libros/arboles" element={<ArbolesLibrosPage />} />
+              <Route path="/interacciones" element={<GrafoInteraccionesPage />} />
+              <Route path="/interacciones/arbol" element={<InteraccionesUsuariosPage />} />
+              <Route path="/ejemplares" element={<EjemplaresPage />} />
 
-            <Route path="/prestamos" element={<PrestamosPage />} />
-            <Route path="/reservas" element={<ReservasPage />} />
-            <Route path="/historial" element={<HistorialPage />} />
+              <Route path="/prestamos" element={<PrestamosPage />} />
+              <Route path="/reservas" element={<ReservasPage />} />
+              <Route path="/historial" element={<HistorialPage />} />
+            </Route>
           </Route>
         </Route>
 

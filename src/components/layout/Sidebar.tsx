@@ -14,6 +14,7 @@ import {
   Network,
   GitBranch,
 } from "lucide-react"
+import { useAuth } from "@/context/AuthContext"
 
 // ============================
 // Sidebar Menu
@@ -21,18 +22,20 @@ import {
 // Opciones principales del menú lateral.
 // Se agrega la vista "Árboles de libros" para visualizar
 // las estructuras no lineales del proyecto.
+const STAFF_ROLES = ["ADMIN", "BIBLIOTECARIO"]
+
 const menu = [
   { title: "Dashboard", href: "/", icon: Home },
-  { title: "Usuarios", href: "/usuarios", icon: Users },
-  { title: "Autores", href: "/autores", icon: UserRound },
-  { title: "Categorías", href: "/categorias", icon: Tags },
-  { title: "Libros", href: "/libros", icon: BookOpen },
-  { title: "Árboles de libros", href: "/libros/arboles", icon: Network },
-  { title: "Interacciones", href: "/interacciones", icon: GitBranch },
-  { title: "Ejemplares", href: "/ejemplares", icon: ClipboardList },
-  { title: "Préstamos", href: "/prestamos", icon: CalendarClock },
-  { title: "Reservas", href: "/reservas", icon: ClipboardList },
-  { title: "Historial", href: "/historial", icon: History },
+  { title: "Usuarios", href: "/usuarios", icon: Users, roles: STAFF_ROLES },
+  { title: "Autores", href: "/autores", icon: UserRound, roles: STAFF_ROLES },
+  { title: "Categorías", href: "/categorias", icon: Tags, roles: STAFF_ROLES },
+  { title: "Libros", href: "/libros", icon: BookOpen, roles: STAFF_ROLES },
+  { title: "Árboles de libros", href: "/libros/arboles", icon: Network, roles: STAFF_ROLES },
+  { title: "Interacciones", href: "/interacciones", icon: GitBranch, roles: STAFF_ROLES },
+  { title: "Ejemplares", href: "/ejemplares", icon: ClipboardList, roles: STAFF_ROLES },
+  { title: "Préstamos", href: "/prestamos", icon: CalendarClock, roles: STAFF_ROLES },
+  { title: "Reservas", href: "/reservas", icon: ClipboardList, roles: STAFF_ROLES },
+  { title: "Historial", href: "/historial", icon: History, roles: STAFF_ROLES },
 ]
 
 // ============================
@@ -50,6 +53,12 @@ interface SidebarProps {
 // Renderiza el menú lateral de navegación.
 // ============================
 export function Sidebar({ mobile = false }: SidebarProps) {
+  const { user } = useAuth()
+  const role = user?.rol.toUpperCase()
+  const visibleItems = menu.filter(
+    (item) => !item.roles || (role && item.roles.includes(role)),
+  )
+
   return (
     <aside
       className={`h-screen w-64 shrink-0 overflow-y-auto border-r bg-background p-4 ${
@@ -59,7 +68,7 @@ export function Sidebar({ mobile = false }: SidebarProps) {
       <h1 className="mb-6 text-xl font-bold">Biblioteca</h1>
 
       <nav className="space-y-1 pb-6">
-        {menu.map((item) => {
+        {visibleItems.map((item) => {
           const Icon = item.icon
 
           return (

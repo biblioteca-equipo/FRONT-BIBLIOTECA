@@ -1,476 +1,160 @@
 # Sistema de Gestión de Biblioteca - Frontend
 
-Frontend desarrollado en React + TypeScript para consumir la API del Sistema de Gestión de Biblioteca.
+Frontend React + TypeScript del Sistema de Gestión de Biblioteca. Consume la API
+FastAPI y ofrece autenticación, gestión bibliotecaria, estructuras de datos y la
+visualización del grafo dirigido usuario-libro.
 
-La aplicación permite gestionar:
+## Ejecución recomendada con Docker Compose
 
-- Inicio de sesión
-- Registro de usuarios
-- Listado de usuarios
-- Creación y listado de autores
-- Creación y listado de categorías
-- Creación, búsqueda y listado de libros
-- Creación de ejemplares
-- Creación y devolución de préstamos
-- Creación y atención de reservas
-- Consulta de historial de acciones
-- Cambio entre modo claro y modo oscuro
+Docker aísla Node.js, PNPM, Nginx y las dependencias del proyecto. El equipo
+anfitrión solo necesita Git, Docker Engine y Docker Compose.
 
----
+Los repositorios deben conservar la estructura de carpetas usada por el proyecto:
 
-## Tecnologías utilizadas
-
-- React
-- TypeScript
-- Vite
-- PNPM
-- Tailwind CSS
-- React Router DOM
-- Axios
-- Lucide React
-- Componentes personalizados basados en shadcn/ui
-
----
-
-## Requisitos previos
-
-Antes de ejecutar el proyecto, se debe tener instalado:
-
-- Node.js
-- PNPM
-
-Verificar versiones:
-
-````bash
-node -v
-pnpm -v
-
-Sí, **sí debes tener `.gitignore`**, principalmente para no subir:
-
-```txt
-node_modules
-.env
-dist
-archivos de cache
-````
-
-Te dejo los comandos para crear **README.md**, **.gitignore** y opcionalmente **.env.example**.
-
----
-
-## 1. Crear `README.md`
-
-Ejecuta en la raíz del frontend:
-
-````bash
-cd ~/FRONT-BIBLIOTECA
-
-cat > README.md <<'EOF'
-# Sistema de Gestión de Biblioteca - Frontend
-
-Frontend desarrollado en React + TypeScript para consumir la API del Sistema de Gestión de Biblioteca.
-
-La aplicación permite gestionar:
-
-- Inicio de sesión
-- Registro de usuarios
-- Listado de usuarios
-- Creación y listado de autores
-- Creación y listado de categorías
-- Creación, búsqueda y listado de libros
-- Creación de ejemplares
-- Creación y devolución de préstamos
-- Creación y atención de reservas
-- Consulta de historial de acciones
-- Cambio entre modo claro y modo oscuro
-
----
-
-## Tecnologías utilizadas
-
-- React
-- TypeScript
-- Vite
-- PNPM
-- Tailwind CSS
-- React Router DOM
-- Axios
-- Lucide React
-- Componentes personalizados basados en shadcn/ui
-
----
-
-## Requisitos previos
-
-Antes de ejecutar el proyecto, se debe tener instalado:
-
-- Node.js
-- PNPM
-
-Verificar versiones:
-
-```bash
-node -v
-pnpm -v
-````
-
-Este proyecto fue trabajado usando PNPM.
-
----
-
-## Instalación del proyecto
-
-Clonar el repositorio:
-
-```bash
-git clone <URL_DEL_REPOSITORIO>
+```text
+estructura-datos/
+├── API-BIBLIOTECA/
+└── FRONT-BIBLIOTECA/
 ```
 
-Entrar a la carpeta del proyecto:
+Desde `API-BIBLIOTECA`, crear el archivo de entorno e iniciar el stack completo:
 
 ```bash
-cd FRONT-BIBLIOTECA
+cp .env.example .env
+docker compose up --build -d
+docker compose ps
 ```
 
-Instalar dependencias:
+En PowerShell, la copia del archivo se realiza con:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Servicios predeterminados:
+
+| Recurso | URL |
+|---|---|
+| Frontend | http://localhost:5173 |
+| API | http://localhost:8003 |
+| Swagger | http://localhost:8003/docs |
+| Health del frontend | http://localhost:5173/health |
+
+El servicio `frontend` espera a que la API esté saludable. Nginx sirve la SPA y
+resuelve las rutas de React hacia `index.html`, por lo que actualizar una ruta
+como `/interacciones` no devuelve 404.
+
+### Configuración del contenedor
+
+Estas variables se definen en `API-BIBLIOTECA/.env`:
+
+| Variable | Valor predeterminado | Propósito |
+|---|---|---|
+| `FRONTEND_PORT` | `5173` | Puerto publicado para el navegador |
+| `API_PORT` | `8003` | Puerto publicado de FastAPI |
+| `PUBLIC_API_URL` | `http://localhost:8003` | URL de API visible desde el navegador |
+| `CORS_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173` | Orígenes permitidos por FastAPI |
+
+`PUBLIC_API_URL` se inyecta al arrancar el contenedor, no al compilar la imagen.
+Esto permite reutilizar la misma imagen en otro computador o sistema operativo.
+Debe ser una URL alcanzable por el navegador; no se debe usar `http://api:8000`,
+porque ese nombre solo existe dentro de la red de Compose.
+
+Si se cambia `FRONTEND_PORT`, también debe incluirse el nuevo origen en
+`CORS_ORIGINS`. Si se cambia `API_PORT`, debe actualizarse `PUBLIC_API_URL`.
+
+### Operación
 
 ```bash
-pnpm install
+docker compose logs -f frontend
+docker compose restart frontend
+docker compose down
 ```
 
----
-
-## Variables de entorno
-
-Crear un archivo `.env` en la raíz del proyecto:
+Para reconstruir únicamente el frontend:
 
 ```bash
-touch .env
+docker compose build frontend
+docker compose up -d frontend
 ```
 
-Agregar la URL del backend:
+## Imagen del frontend
+
+El `Dockerfile` usa dos etapas:
+
+1. Node.js y PNPM instalan exactamente el lockfile y ejecutan el build de Vite.
+2. Nginx sin privilegios sirve únicamente los archivos generados.
+
+El contexto excluye dependencias y artefactos del host mediante `.dockerignore`.
+La imagen final no contiene `node_modules`, TypeScript ni las herramientas de
+desarrollo.
+
+La imagen también puede construirse de forma aislada:
+
+```bash
+docker build -t front-biblioteca .
+docker run --rm -p 5173:8080 \
+  -e API_URL=http://localhost:8003 \
+  front-biblioteca
+```
+
+En PowerShell:
+
+```powershell
+docker run --rm -p 5173:8080 `
+  -e API_URL=http://localhost:8003 `
+  front-biblioteca
+```
+
+## Desarrollo local opcional
+
+Para trabajar con recarga en caliente fuera de Docker se requieren Node.js y
+PNPM. Esta modalidad es opcional y no interviene en la imagen de producción.
+
+```bash
+pnpm install --frozen-lockfile
+pnpm dev
+```
+
+La URL de la API puede configurarse en `.env.local`:
 
 ```env
 VITE_API_URL=http://127.0.0.1:8003
 ```
 
-Si no se configura esta variable, el frontend usará por defecto:
+Prioridad de configuración:
 
-```txt
-http://127.0.0.1:8003
-```
+1. `API_URL` inyectada al contenedor en `runtime-config.js`.
+2. `VITE_API_URL` usada por Vite durante desarrollo o build local.
+3. `http://127.0.0.1:8003` como valor de respaldo.
 
----
-
-## Ejecutar el frontend
-
-Para correr el proyecto en modo desarrollo:
+## Calidad y pruebas
 
 ```bash
-pnpm dev
-```
-
-Luego abrir en el navegador:
-
-```txt
-http://localhost:5173
-```
-
----
-
-## Backend requerido
-
-Este frontend consume una API desarrollada en FastAPI.
-
-El backend debe estar corriendo en:
-
-```txt
-http://127.0.0.1:8000
-```
-
-Comando típico para correr el backend:
-
-```bash
-uvicorn main:app --reload
-```
-
----
-
-## Endpoints consumidos
-
-### Auth
-
-```txt
-POST /auth/register
-POST /auth/login-json
-GET  /auth/me
-```
-
-### Usuarios
-
-```txt
-GET /usuarios
-```
-
-### Autores
-
-```txt
-GET  /autores
-POST /autores
-```
-
-### Categorías
-
-```txt
-GET  /categorias
-POST /categorias
-```
-
-### Libros
-
-```txt
-GET  /libros
-POST /libros
-GET  /libros/buscar
-GET  /libros/catalogo/lista
-POST /libros/ejemplares
-```
-
-### Préstamos
-
-```txt
-GET  /prestamos
-POST /prestamos
-PUT  /prestamos/{prestamo_id}/devolver
-```
-
-### Reservas
-
-```txt
-POST /reservas
-GET  /reservas/cola
-PUT  /reservas/atender-siguiente
-```
-
-### Historial
-
-```txt
-GET /historial/pila
-GET /historial/ultima-accion
-```
-
----
-
-## Estructura principal del proyecto
-
-```txt
-FRONT-BIBLIOTECA/
-├── public/
-├── src/
-│   ├── components/
-│   │   ├── layout/
-│   │   │   ├── AppLayout.tsx
-│   │   │   ├── AuthLayout.tsx
-│   │   │   ├── CopyrightFooter.tsx
-│   │   │   └── Sidebar.tsx
-│   │   ├── theme/
-│   │   │   ├── mode-toggle.tsx
-│   │   │   └── theme-provider.tsx
-│   │   └── ui/
-│   ├── context/
-│   │   └── AuthContext.tsx
-│   ├── hooks/
-│   │   ├── useAutores.ts
-│   │   ├── useCategorias.ts
-│   │   ├── useHistorial.ts
-│   │   ├── useLibros.ts
-│   │   ├── usePrestamos.ts
-│   │   ├── useReservas.ts
-│   │   └── useUsuarios.ts
-│   ├── lib/
-│   │   ├── api.ts
-│   │   └── types.ts
-│   ├── pages/
-│   │   ├── auth/
-│   │   ├── autores/
-│   │   ├── categorias/
-│   │   ├── dashboard/
-│   │   ├── historial/
-│   │   ├── libros/
-│   │   ├── prestamos/
-│   │   ├── reservas/
-│   │   └── usuarios/
-│   ├── routes/
-│   │   └── ProtectedRoute.tsx
-│   ├── App.tsx
-│   ├── main.tsx
-│   └── index.css
-├── package.json
-├── pnpm-lock.yaml
-├── vite.config.ts
-├── tailwind.config.js
-├── tsconfig.json
-└── README.md
-```
-
----
-
-## Flujo general de uso
-
-1. El usuario entra a `/login`.
-2. Si no tiene cuenta, puede ir a `/registro`.
-3. Al iniciar sesión correctamente, se guarda el token en `localStorage`.
-4. Las rutas internas quedan protegidas.
-5. El frontend envía el token en las peticiones mediante Axios.
-6. El usuario puede navegar por el sistema desde el sidebar.
-
----
-
-## Comandos útiles
-
-Instalar dependencias:
-
-```bash
-pnpm install
-```
-
-Ejecutar en desarrollo:
-
-```bash
-pnpm dev
-```
-
-Formatear archivos:
-
-```bash
-pnpm exec prettier --write "src/**/*.{ts,tsx,css}"
-```
-
-Compilar para producción:
-
-```bash
+pnpm test
+pnpm test:coverage
+pnpm lint
+pnpm typecheck
 pnpm build
 ```
 
-Previsualizar build:
+Las pruebas usan Vitest, Testing Library y JSDOM. Las solicitudes HTTP se
+sustituyen mediante `src/test/apiMock.ts`, por lo que no requieren FastAPI ni
+MariaDB en ejecución.
 
-```bash
-pnpm preview
-```
+## Tecnologías
 
----
+- React 19, TypeScript y Vite
+- React Router y Axios
+- Tailwind CSS y componentes basados en shadcn/ui
+- Vitest y Testing Library
+- PNPM con lockfile
+- Nginx sin privilegios para producción
 
 ## Autores
-
-Desarrollado por:
 
 - Juan Esteban Cajio
 - Angel Eduardo Medina
 - Jader Montoya
 
----
-
-## Derechos de autor
-
-© 2026 Sistema de Gestión de Biblioteca. Todos los derechos reservados.
-EOF
-
-````
-
----
-
-## 2. Crear `.gitignore`
-
-Ejecuta:
-
-```bash
-cat > .gitignore <<'EOF'
-# Dependencies
-node_modules/
-
-# Build
-dist/
-build/
-
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# Cache
-.cache/
-.vite/
-.turbo/
-
-# Editor
-.vscode/*
-!.vscode/settings.json
-.idea/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# TypeScript
-*.tsbuildinfo
-node_modules/.tmp/
-EOF
-````
-
----
-
-## 3. Crear `.env.example`
-
-Esto sí se sube al repo para que otros sepan qué variable crear.
-
-```bash
-cat > .env.example <<'EOF'
-VITE_API_URL=http://127.0.0.1:8000
-EOF
-```
-
----
-
-## 4. Verifica archivos
-
-```bash
-ls -la
-```
-
-Debes ver:
-
-```txt
-README.md
-.gitignore
-.env.example
-package.json
-pnpm-lock.yaml
-src/
-```
-
----
-
-## 5. Subir al repo
-
-```bash
-git status
-git add README.md .gitignore .env.example
-git commit -m "docs: agregar readme y gitignore del frontend"
-git push
-```
-
-Si también quieres subir todos los cambios del frontend:
-
-```bash
-git add .
-git commit -m "feat: implementar interfaz frontend biblioteca"
-git push
-```
+© 2026 Sistema de Gestión de Biblioteca.

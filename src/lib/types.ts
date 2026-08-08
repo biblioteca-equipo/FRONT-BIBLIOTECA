@@ -140,3 +140,89 @@ export interface CatalogoListaResponse {
   total: number
   datos: CatalogoLibro[]
 }
+
+export interface GraphUserVertex {
+  clave: string
+  tipo: "usuario"
+  id: number
+  etiqueta: string
+  estado: string
+}
+
+export interface GraphBookVertex {
+  clave: string
+  tipo: "libro"
+  id: number
+  titulo: string
+  isbn: string | null
+  estado: string
+}
+
+export type GraphVertex = GraphUserVertex | GraphBookVertex
+
+export interface GraphEdge {
+  origen: string
+  destino: string
+  peso: number
+  prestamos_total: number
+  prestamos_activos: number
+  prestamos_devueltos: number
+  prestamos_vencidos: number
+  devoluciones_total: number
+  reservas_total: number
+  reservas_pendientes: number
+  reservas_atendidas: number
+  reservas_canceladas: number
+  ultima_interaccion: string | null
+}
+
+export interface GraphMetadata {
+  dirigido: true
+  ponderado: true
+  bipartito: true
+  total_vertices: number
+  total_aristas: number
+  peso_total: number
+  tiempo_construccion_ms: number
+  regla_peso: "prestamos_total + reservas_total"
+  filtros: Record<string, string | number | boolean | null>
+  truncado: boolean
+}
+
+export interface GraphSnapshot {
+  metadatos: GraphMetadata
+  vertices: GraphVertex[]
+  aristas: GraphEdge[]
+}
+
+export interface GraphNeighborsResponse {
+  metadatos: GraphMetadata
+  vertice: GraphVertex
+  vecinos: GraphVertex[]
+  aristas: GraphEdge[]
+}
+
+export interface GraphTraversalResponse {
+  algoritmo: "bfs" | "dfs"
+  inicio: string
+  orden: string[]
+  total_visitados: number
+}
+
+export interface GraphFilters {
+  usuario: string
+  libro: string
+  interaccion: "todas" | "prestamos" | "devoluciones" | "reservas"
+  estado:
+    | "todos"
+    | "prestamo_activo"
+    | "prestamo_devuelto"
+    | "prestamo_vencido"
+    | "reserva_pendiente"
+    | "reserva_atendida"
+    | "reserva_cancelada"
+}
+
+export type GraphSelection =
+  | { kind: "vertex"; key: string }
+  | { kind: "edge"; source: string; target: string }

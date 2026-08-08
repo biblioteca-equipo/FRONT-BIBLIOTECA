@@ -1,7 +1,9 @@
 import axios from "axios"
 
+import { resolveApiBaseUrl } from "./runtimeConfig"
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://127.0.0.1:8003",
+  baseURL: resolveApiBaseUrl(),
   headers: {
     "Content-Type": "application/json",
   },

@@ -4,6 +4,7 @@ node_modules/
 # ===== Build / producción =====
 dist/
 build/
+coverage/
 
 # ===== Variables de entorno =====
 .env

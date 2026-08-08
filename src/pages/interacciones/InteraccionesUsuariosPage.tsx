@@ -295,29 +295,14 @@ export function InteraccionesUsuariosPage() {
           `/libros/catalogo/interacciones/usuario/${idNumerico}`
         )
 
-      console.log(
-        "Respuesta original de interacciones:",
-        response.data
-      )
-
       const respuestaNormalizada = normalizarRespuesta(
         response.data
-      )
-
-      console.log(
-        "Respuesta normalizada:",
-        respuestaNormalizada
       )
 
       setCatalogoInteracciones(
         respuestaNormalizada
       )
-    } catch (error) {
-      console.error(
-        "Error cargando interacciones:",
-        error
-      )
-
+    } catch {
       setCatalogoInteracciones(null)
 
       setError(

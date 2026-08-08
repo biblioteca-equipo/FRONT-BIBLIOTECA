@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react"
 import { api } from "@/lib/api"
 import type { LoginRequest, TokenResponse, Usuario, UsuarioCreate } from "@/lib/types"
 
-interface AuthContextType {
+export interface AuthContextType {
   token: string | null
   user: Usuario | null
   loading: boolean
@@ -11,7 +11,7 @@ interface AuthContextType {
   logout: () => void
 }
 
-const AuthContext = createContext<AuthContextType | null>(null)
+export const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(localStorage.getItem("token"))
