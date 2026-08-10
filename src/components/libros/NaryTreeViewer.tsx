@@ -26,12 +26,6 @@ interface NaryNode {
     // User Data
     // ============================
     usuario_id?: number
-    nombre?: string
-    apellido?: string
-    documento?: string
-    email?: string
-    rol?: string
-
     // ============================
     // Interaction Data
     // ============================

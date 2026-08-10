@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/react"
 import { Route, Routes } from "react-router-dom"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import { GrafoInteraccionesPage } from "@/pages/interacciones/GrafoInteraccionesPage"
 import { apiMock } from "@/test/apiMock"
@@ -36,22 +36,30 @@ describe("GrafoInteraccionesPage", () => {
     expect(screen.getByRole("img", { name: /Grafo bipartito/ })).toBeInTheDocument()
   })
 
-  it("representa el estado vacio sin exponer campos personales", async () => {
-    const payload = graphFixture({ vertices: [], aristas: [] })
+  it("descarta campos personales de una respuesta no vacia y no los registra", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined)
+    const consoleLog = vi.spyOn(console, "log").mockImplementation(() => undefined)
+    const payload = graphFixture()
     apiMock.onGet("/grafos/interacciones").reply(200, {
       ...payload,
-      metadatos: {
-        ...payload.metadatos,
-        total_vertices: 0,
-        total_aristas: 0,
-        peso_total: 0,
-      },
+      vertices: payload.vertices.map((vertex) => ({
+        ...vertex,
+        documento: "PII-DOC-7788",
+        correo: "pii@example.test",
+        telefono: "3009998877",
+        token: "PII-TOKEN-7788",
+        password_hash: "PII-HASH-7788",
+      })),
     })
 
     renderPage()
 
-    expect(await screen.findByText(/No hay relaciones/)).toBeInTheDocument()
-    expect(document.body.textContent).not.toMatch(/documento|correo|telefono|token|password|hash/i)
+    expect(await screen.findByRole("img", { name: /Grafo bipartito/ })).toBeInTheDocument()
+    expect(document.body.textContent).not.toMatch(
+      /PII-DOC-7788|pii@example\.test|3009998877|PII-TOKEN-7788|PII-HASH-7788/i,
+    )
+    expect(consoleError).not.toHaveBeenCalled()
+    expect(consoleLog).not.toHaveBeenCalled()
   })
 
   it("muestra el estado 403 y ofrece reintentar", async () => {

@@ -17,31 +17,9 @@ import {
 } from "@/components/ui/card"
 
 // ============================
-// Role Interface
-// ============================
-// El backend puede devolver el rol como texto:
-// "ADMIN"
-//
-// O como un objeto:
-// {
-//   id: 1,
-//   nombre: "ADMIN",
-//   descripcion: "...",
-//   created_at: "..."
-// }
-// ============================
-interface RolResponse {
-  id: number
-  nombre: string
-  descripcion?: string | null
-  created_at?: string | null
-}
-
-// ============================
 // Normalized N-Ary Node Data
 // ============================
-// Esta es la estructura que utilizará el frontend.
-// El rol siempre debe quedar convertido en texto.
+// Esta estructura excluye atributos personales del usuario.
 // ============================
 interface NaryNodeData {
   tipo?: string
@@ -51,11 +29,6 @@ interface NaryNodeData {
   estado?: string
 
   usuario_id?: number
-  nombre?: string
-  apellido?: string
-  documento?: string
-  email?: string
-  rol?: string
 
   interaccion?: string
   prestamo_id?: number
@@ -95,9 +68,7 @@ interface NaryNodeResponse {
 interface RawNaryNodeResponse {
   key: string
   label: string
-  data: Omit<NaryNodeData, "rol"> & {
-    rol?: string | RolResponse | null
-  }
+  data: NaryNodeData & Record<string, unknown>
   children?: RawNaryNodeResponse[]
 }
 
@@ -106,10 +77,7 @@ interface RawNaryNodeResponse {
 // ============================
 interface UsuarioInteraccionesResponse {
   id: number
-  nombre: string
-  documento: string
-  email: string
-  rol: string
+  etiqueta: string
   estado: string
 }
 
@@ -118,11 +86,8 @@ interface UsuarioInteraccionesResponse {
 // ============================
 interface RawUsuarioInteraccionesResponse {
   id: number
-  nombre: string
-  documento: string
-  email: string
-  rol: string | RolResponse | null
   estado: string
+  [key: string]: unknown
 }
 
 // ============================
@@ -160,49 +125,45 @@ interface RawCatalogoInteraccionesResponse {
 }
 
 // ============================
-// Get Role Name
-// ============================
-// Convierte el rol recibido en un texto que React
-// pueda mostrar sin producir errores.
-//
-// Ejemplos:
-// "ADMIN" -> "ADMIN"
-// { nombre: "ADMIN" } -> "ADMIN"
-// ============================
-function obtenerNombreRol(
-  rol: string | RolResponse | null | undefined
-): string {
-  if (!rol) {
-    return "Sin rol"
-  }
-
-  if (typeof rol === "string") {
-    return rol
-  }
-
-  return rol.nombre
-}
-
-// ============================
 // Normalize N-Ary Node
 // ============================
-// Recorre recursivamente todos los nodos del árbol
-// y convierte cualquier objeto rol en texto.
+// Conserva exclusivamente los atributos funcionales usados por el árbol.
 // ============================
 function normalizarNodo(
   node: RawNaryNodeResponse
 ): NaryNodeResponse {
-  const rolNormalizado = node.data.rol
-    ? obtenerNombreRol(node.data.rol)
-    : undefined
+  const data: NaryNodeData = {
+    tipo: node.data.tipo,
+    id: node.data.id,
+    titulo: node.data.titulo,
+    isbn: node.data.isbn,
+    estado: node.data.estado,
+    usuario_id: node.data.usuario_id,
+    interaccion: node.data.interaccion,
+    prestamo_id: node.data.prestamo_id,
+    reserva_id: node.data.reserva_id,
+    ejemplar_id: node.data.ejemplar_id,
+    codigo_ejemplar: node.data.codigo_ejemplar,
+    estado_ejemplar: node.data.estado_ejemplar,
+    estado_libro: node.data.estado_libro,
+    estado_prestamo: node.data.estado_prestamo,
+    estado_reserva: node.data.estado_reserva,
+    fecha_prestamo: node.data.fecha_prestamo,
+    fecha_limite: node.data.fecha_limite,
+    fecha_devolucion: node.data.fecha_devolucion,
+    fecha_reserva: node.data.fecha_reserva,
+    fecha_atencion: node.data.fecha_atencion,
+    descripcion: node.data.descripcion,
+  }
+  const userId = data.usuario_id ?? data.id
+  const label = data.tipo?.toLowerCase() === "usuario" && userId
+    ? `Usuario ${userId}`
+    : node.label
 
   return {
     key: node.key,
-    label: node.label,
-    data: {
-      ...node.data,
-      rol: rolNormalizado,
-    },
+    label,
+    data,
     children: (node.children ?? []).map(normalizarNodo),
   }
 }
@@ -221,8 +182,9 @@ function normalizarRespuesta(
     relacion: data.relacion,
     descripcion: data.descripcion,
     usuario: {
-      ...data.usuario,
-      rol: obtenerNombreRol(data.usuario.rol),
+      id: data.usuario.id,
+      etiqueta: `Usuario ${data.usuario.id}`,
+      estado: data.usuario.estado,
     },
     total_nodos: data.total_nodos,
     total_prestamos: data.total_prestamos,
@@ -450,7 +412,7 @@ export function InteraccionesUsuariosPage() {
                 <strong className="text-foreground">
                   Usuario:
                 </strong>{" "}
-                {catalogoInteracciones.usuario.nombre}
+                {catalogoInteracciones.usuario.etiqueta}
               </p>
 
               <p>
@@ -481,35 +443,9 @@ export function InteraccionesUsuariosPage() {
 
               <p>
                 <strong className="text-foreground">
-                  Documento:
-                </strong>{" "}
-                {catalogoInteracciones.usuario.documento}
-              </p>
-
-              <p>
-                <strong className="text-foreground">
-                  Rol:
-                </strong>{" "}
-                {catalogoInteracciones.usuario.rol}
-              </p>
-
-              <p>
-                <strong className="text-foreground">
                   Estado:
                 </strong>{" "}
                 {catalogoInteracciones.usuario.estado}
-              </p>
-            </div>
-
-            {/* ============================
-                Contact Details
-                ============================ */}
-            <div className="rounded-md border p-4 text-sm text-muted-foreground">
-              <p>
-                <strong className="text-foreground">
-                  Correo electrónico:
-                </strong>{" "}
-                {catalogoInteracciones.usuario.email}
               </p>
             </div>
 

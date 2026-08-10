@@ -1,7 +1,7 @@
 // ============================
 // Imports
 // ============================
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 import { api } from "@/lib/api"
 
@@ -166,43 +166,27 @@ export function ArbolesLibrosPage() {
     : []
 
   // ============================
-  // Load AVL Tree
-  // ============================
-  // Consulta el backend para obtener el catálogo como árbol AVL.
-  // ============================
-  async function cargarCatalogoAvl() {
-    const response = await api.get<CatalogoAvlResponse>("/libros/catalogo/arbol-avl")
-    setCatalogoAvl(response.data)
-  }
-
-  // ============================
-  // Load N-Ary Tree
-  // ============================
-  // Consulta el backend para obtener el catálogo como árbol n-ario.
-  // ============================
-  async function cargarCatalogoNario() {
-    const response = await api.get<CatalogoNarioResponse>("/libros/catalogo/arbol-nario")
-    setCatalogoNario(response.data)
-  }
-
-  // ============================
   // Load Trees
   // ============================
   // Carga las dos estructuras no lineales.
   // ============================
-  async function cargarArboles() {
+  const cargarArboles = useCallback(async () => {
     try {
       setLoading(true)
       setError("")
 
-      await Promise.all([cargarCatalogoAvl(), cargarCatalogoNario()])
-    } catch (error) {
-      console.error("Error cargando árboles:", error)
+      const [avlResponse, naryResponse] = await Promise.all([
+        api.get<CatalogoAvlResponse>("/libros/catalogo/arbol-avl"),
+        api.get<CatalogoNarioResponse>("/libros/catalogo/arbol-nario"),
+      ])
+      setCatalogoAvl(avlResponse.data)
+      setCatalogoNario(naryResponse.data)
+    } catch {
       setError("No se pudieron cargar los árboles de libros.")
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   // ============================
   // Search ISBN In AVL
@@ -234,8 +218,7 @@ export function ArbolesLibrosPage() {
       } else {
         setIsbnSeleccionado("")
       }
-    } catch (error) {
-      console.error("Error buscando ISBN en AVL:", error)
+    } catch {
       setIsbnSeleccionado("")
       setError("No se pudo buscar el libro dentro del árbol AVL.")
     }
@@ -258,8 +241,8 @@ export function ArbolesLibrosPage() {
   // Carga los árboles al ingresar a la vista.
   // ============================
   useEffect(() => {
-    cargarArboles()
-  }, [])
+    void cargarArboles()
+  }, [cargarArboles])
 
   return (
     <div className="space-y-4">

@@ -133,6 +133,7 @@ Prioridad de configuración:
 ```bash
 pnpm test
 pnpm test:coverage
+pnpm test:e2e
 pnpm lint
 pnpm typecheck
 pnpm build
@@ -141,6 +142,26 @@ pnpm build
 Las pruebas usan Vitest, Testing Library y JSDOM. Las solicitudes HTTP se
 sustituyen mediante `src/test/apiMock.ts`, por lo que no requieren FastAPI ni
 MariaDB en ejecución.
+
+La suite `test:e2e` usa Playwright con Chromium y respuestas HTTP deterministas
+para verificar en navegador filtros, detalle, recorridos, errores, permisos,
+truncación y privacidad. La primera instalación del entorno requiere:
+
+```bash
+pnpm exec playwright install chromium
+```
+
+Con el stack de Compose en ejecución se puede validar además la integración real:
+
+```powershell
+$env:PLAYWRIGHT_REAL_API="1"
+pnpm test:e2e:real
+```
+
+La prueba real usa por defecto el frontend `http://127.0.0.1:5173`, la API
+`http://127.0.0.1:8003` y las credenciales de demostración documentadas por el
+backend. Esos valores pueden sobrescribirse con `PLAYWRIGHT_BASE_URL`,
+`PLAYWRIGHT_API_URL`, `DEMO_ADMIN_EMAIL` y `DEMO_ADMIN_PASSWORD`.
 
 ## Tecnologías
 
